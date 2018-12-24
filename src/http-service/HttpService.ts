@@ -1,63 +1,56 @@
+import { from, Subscription } from 'rxjs'
+import { map } from 'rxjs/operators'
+
 export default class HttpService {
 
     private readonly POST = 'POST';
     private readonly PUT = 'PUT';
     private readonly DELETE = 'DELETE';
 
-    public apiUrl: string = 'http://localhost:3200';
-    public resource: string;
+    private apiUrl: string = 'http://localhost:3200';
+    private resource: string;
 
     public constructor(resource: string) {
         this.resource = resource;
     }
 
-    public async getAll(action: string) {
-        const response = await fetch(`${this.apiUrl}/${this.resource}/${action}`);
-        const json = await response.json();
-        return json;
+    public getAll(action: string, next?: (data: any) => void, error?: (error: any) => void, complete?: () => void): Subscription {
+        return from(fetch(`${this.apiUrl}/${this.resource}/${action}`)
+        ).pipe(map(response => response.json())).subscribe(next, error, complete);
     }
 
-    public async getById(action: string, id: number) {
-        const response = await fetch(`${this.apiUrl}/${this.resource}/${action}${id}`);
-        const json = await response.json();
-        return json;
+    public getById(action: string, id: number, next?: (data: any) => void, error?: (error: any) => void, complete?: () => void): Subscription {
+        return from(fetch(`${this.apiUrl}/${this.resource}/${action}${id}`)
+        ).pipe(map(response => response.json())).subscribe(next, error, complete);
     }
 
-    public async post(action: string, body: any) {
-        const response = await fetch(`${this.apiUrl}/${this.resource}/${action}`, {
-            headers: this.construirHeader(),
+    public post(action: string, body: any, next?: (data: any) => void, error?: (error: any) => void, complete?: () => void): Subscription {
+        return from(fetch(`${this.apiUrl}/${this.resource}/${action}`, {
+            ...this.fetchOptions(this.POST, body)
+        })).pipe(map(response => response.json())).subscribe(next, error, complete);
+    }
+
+    public put(action: string, body: any, id: number, next?: (data: any) => void, error?: (error: any) => void, complete?: () => void): Subscription {
+        return from(fetch(`${this.apiUrl}/${this.resource}/${action}${id}`, {
+            ...this.fetchOptions(this.PUT, body)
+        })).pipe(map(response => response.json())).subscribe(next, error, complete);
+    }
+
+    public delete(action: string, id: number, next?: (data: any) => void, error?: (error: any) => void, complete?: () => void): Subscription {
+        return from(fetch(`${this.apiUrl}/${this.resource}/${action}${id}`, {
+            ...this.fetchOptions(this.DELETE)
+        })).pipe(map(response => response.json())).subscribe(next, error, complete);
+    }
+
+    private fetchOptions(httpVerb: string, body?: any, ): any {
+        return {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(body),
-            method: this.POST
-        });
-        const json = await response.json();
-        return json;
-    }
-
-    public async put(action: string, body: any, id: number) {
-        const response = await fetch(`${this.apiUrl}/${this.resource}/${action}${id}`, {
-            headers: this.construirHeader(),
-            body: JSON.stringify(body),
-            method: this.PUT
-        });
-        const json = await response.json();
-        return json;
-    }
-
-    public async delete(action: string, id: number) {
-        const response = await fetch(`${this.apiUrl}/${this.resource}/${action}${id}`, {
-            headers: this.construirHeader(),
-            method: this.DELETE
-        });
-        const json = await response.json();
-        return json;
-    }
-
-    private construirHeader(): any {
-        const headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            method: httpVerb
         }
-        return headers;
     }
 
 }

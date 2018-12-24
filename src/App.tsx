@@ -2,9 +2,8 @@ import * as React from 'react';
 import './App.css';
 import Table from './components/table/table';
 import HttpService from './http-service/HttpService';
-
-
-
+import Formulario from './components/formulario/formulario';
+import { Pessoa } from './components/formulario/models/pessoa';
 
 export default class App extends React.Component<any, any> {
 
@@ -17,20 +16,25 @@ export default class App extends React.Component<any, any> {
         { name: "Id", property: "id" },
         { name: "Nome", property: "nome" },
         { name: "CPF", property: "cpf" },
-        {name:'Idade',property:"idade"}
+        { name: 'Idade', property: "idade" }
       ]
     };
-    this.buscarPessoas();
+    this.httpService.delete(``, 3, () => { this.buscarPessoas() });
   }
 
-  public async buscarPessoas() {
-    const response = await this.httpService.getAll('');
-    this.setState({ rows: response });
+  public buscarPessoas(): void {
+    this.httpService.getAll(``, async response => {
+      const dados = await response;
+      this.setState({ rows: dados });
+    });
   }
 
   public render(): JSX.Element {
     return (
-      <Table cols={this.state.cols} rows={this.state.rows} styles={"table table-striped"} />
+      <div className="table-responsive">
+        <Formulario pessoa={new Pessoa()} />
+        <Table cols={this.state.cols} rows={this.state.rows} styles={"table table-striped table-bordered table-hover"} />
+      </div>
     );
   }
 }
