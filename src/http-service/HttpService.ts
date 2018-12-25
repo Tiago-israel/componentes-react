@@ -7,7 +7,7 @@ export default class HttpService {
     private readonly PUT = 'PUT';
     private readonly DELETE = 'DELETE';
 
-    private apiUrl: string = 'http://localhost:3200';
+    private readonly apiUrl: string = 'http://localhost:3200';
     private resource: string;
 
     public constructor(resource: string) {

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ITableProps } from './interfaces/ITableProps';
-
+import Botao from '../botao/botao'
 
 export default class Table extends React.Component<ITableProps, any> {
 
@@ -41,6 +41,16 @@ export default class Table extends React.Component<ITableProps, any> {
         );
     }
 
+    private createActions(row: any) {
+        const lista: JSX.Element[] = [];
+        if (this.props.actions) {
+            this.props.actions.forEach(c => {
+                lista.push(<Botao label={c.label} styles={c.styles} handleAction={() => { c.handleAction(row) }} />);
+            });
+        }
+        return lista;
+    }
+
     private popularTabela(): JSX.Element[] {
         const elements: JSX.Element[] = [];
         if (this.props.rows && this.props.cols) {
@@ -49,6 +59,13 @@ export default class Table extends React.Component<ITableProps, any> {
                     <tr>
                         {
                             this.props.cols.map((col, key) => {
+                                if (col.property === 'actions') {
+                                    return (
+                                        <td key={key}>
+                                            {this.createActions(row)}
+                                        </td>
+                                    );
+                                }
                                 return <td key={key}>{row[col.property]}</td>
                             })
                         }
@@ -69,11 +86,15 @@ export default class Table extends React.Component<ITableProps, any> {
     }
 
     public render(): JSX.Element {
+        let filter = null;
+        if (this.props.filter) {
+            filter = this.criarFiltros();
+        }
         return (
             <table className={this.props.styles}>
                 <thead>
                     {this.carregarColunas()}
-                    {this.criarFiltros()}
+                    {filter}
                 </thead>
                 <tbody>
                     {this.popularTabela()}

@@ -2,8 +2,6 @@ import * as React from 'react';
 import './App.css';
 import Table from './components/table/table';
 import HttpService from './http-service/HttpService';
-import Formulario from './components/formulario/formulario';
-import { Pessoa } from './components/formulario/models/pessoa';
 
 export default class App extends React.Component<any, any> {
 
@@ -16,10 +14,11 @@ export default class App extends React.Component<any, any> {
         { name: "Id", property: "id" },
         { name: "Nome", property: "nome" },
         { name: "CPF", property: "cpf" },
-        { name: 'Idade', property: "idade" }
+        { name: 'Idade', property: "idade" },
+        { name: 'Ações', property: "actions" }
       ]
     };
-    this.httpService.delete(``, 3, () => { this.buscarPessoas() });
+    this.buscarPessoas();
   }
 
   public buscarPessoas(): void {
@@ -29,14 +28,36 @@ export default class App extends React.Component<any, any> {
     });
   }
 
+  public excluir = (obj: any) => {
+    this.httpService.delete(``, obj.id, () => {
+      this.buscarPessoas();
+    })
+  }
+
+  public detalhes = (obj: any) => {
+    console.log(obj);
+  }
+
   public render(): JSX.Element {
     return (
       <div className="table-responsive">
-        <Formulario pessoa={new Pessoa()} />
-        <Table cols={this.state.cols} rows={this.state.rows} styles={"table table-striped table-bordered table-hover"} />
+        <Table
+          filter={false}
+          cols={this.state.cols}
+          rows={this.state.rows}
+          styles={"table table-striped table-bordered table-hover"}
+          actions={[{
+            label: 'Detalhes',
+            styles: 'btn btn-info',
+            handleAction: this.detalhes
+          },
+          {
+            label: 'Excluir',
+            styles: 'btn btn-danger',
+            handleAction: this.excluir
+          }]}
+        />
       </div>
     );
   }
 }
-
-
